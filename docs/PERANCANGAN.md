@@ -307,7 +307,7 @@ Catatan: `lockForUpdate` tidak berefek di SQLite, jadi test concurrency (BR-07, 
 | Tiga FormRequest (satu per jenis) | Satu `SubmissionRequest` dengan aturan per jenis | Lebih sedikit file, aturan tetap di satu tempat |
 | `days` bertipe tinyint | `days` bertipe smallint | Rentang tanggal panjang bisa melebihi 255 hari kerja sebelum ditolak aturan kuota |
 | Aturan bisnis dicek saat simpan dan submit | Bentuk isian dicek saat simpan draft; aturan bisnis (kuota, bentrok, batas nominal, 30 hari) dicek saat submit | Draft boleh belum lengkap benar; yang penting tidak bisa diajukan |
-| Minggu 3: Docker Compose, MySQL, deploy | Deploy ke Railway dengan SQLite di volume, tanpa Docker Compose (langkahnya di README) | Railway mengenali Laravel tanpa Dockerfile, dan SQLite cukup untuk demo |
+| Minggu 3: Docker Compose, MySQL, deploy | Container di Vercel (`Dockerfile.vercel`) dengan PostgreSQL dan penyimpanan nota di Supabase; SQLite tetap dipakai untuk pengembangan dan test | Keduanya punya paket gratis; isi container Vercel tidak awet sehingga data harus di luar |
 | Seeder memakai `UserFactory` | Seeder memakai `User::create` dan aman dijalankan berulang | Faker adalah dependency dev, jadi factory tidak bisa dipakai di produksi |
 | Pesan validasi | Bahasa Indonesia lewat `lang/id/validation.php` (hanya aturan yang dipakai) | Konsisten dengan bahasa antarmuka |
 

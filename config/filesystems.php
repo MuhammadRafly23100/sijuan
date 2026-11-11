@@ -56,7 +56,8 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            // Gagal unggah nota harus terlihat sebagai error, bukan diam-diam menyimpan path kosong.
+            'throw' => true,
             'report' => false,
         ],
 

@@ -83,34 +83,22 @@ php artisan test
 
 Feature test di [`tests/Feature/SubmissionWorkflowTest.php`](tests/Feature/SubmissionWorkflowTest.php) menguji aturan bisnis lewat HTTP, sehingga route, policy, validasi, dan workflow teruji sekaligus.
 
-## Deploy ke Railway
+## Deploy (Vercel + Supabase)
 
-Tidak perlu Dockerfile: Railway mengenali Laravel, memasang dependency, menjalankan `npm run build`, dan menjalankan migrasi saat start. Setiap push ke `main` otomatis ter-deploy.
+Versi online berjalan sebagai container di Vercel (lihat [`Dockerfile.vercel`](Dockerfile.vercel): FrankenPHP dengan Laravel di dalamnya). Karena isi container tidak awet, data disimpan di Supabase: tabel di PostgreSQL, nota di Storage lewat protokol S3. Setiap push ke `main` otomatis ter-deploy.
 
-1. Buat projek baru di Railway dari repo GitHub ini.
-2. Tambahkan **Volume** ke service dengan mount path `/app/storage/app`. Database SQLite dan nota disimpan di sana supaya tidak hilang saat deploy ulang.
-3. Isi **Variables**:
+1. Di Supabase, buat projek, buat bucket privat bernama `nota`, dan buat S3 access key di pengaturan Storage.
+2. Salin [`.env.production.example`](.env.production.example) menjadi `.env.production` lalu isi. Untuk `DB_URL`, pakai connection string **Session pooler** dari tombol Connect.
+3. Buat kunci aplikasi, lalu tabel dan akun demo, dari komputer sendiri:
 
-   ```
-   APP_NAME=SIJUAN
-   APP_ENV=production
-   APP_DEBUG=false
-   APP_KEY=<hasil dari: php artisan key:generate --show>
-   APP_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
-   APP_LOCALE=id
-   DB_CONNECTION=sqlite
-   DB_DATABASE=/app/storage/app/database.sqlite
-   LOG_CHANNEL=stderr
-   SESSION_SECURE_COOKIE=true
+   ```bash
+   php artisan key:generate --env=production --force
+   php artisan migrate --env=production --force --seed
    ```
 
-4. Di Settings → Deploy, isi **Custom Start Command** supaya akun demo dibuat saat pertama kali jalan (seeder tidak melakukan apa-apa jika sudah ada user):
+4. Di Vercel, buat projek dari repo ini dan masukkan isi `.env.production` ke Settings → Environment Variables, lalu deploy ulang.
 
-   ```
-   php artisan migrate --force && php artisan db:seed --force && /start-container.sh
-   ```
-
-5. Di Settings → Networking, klik **Generate Domain**.
+Migrasi mengaktifkan Row Level Security di semua tabel saat berjalan di PostgreSQL, supaya tabel tidak terbaca lewat Data API Supabase.
 
 ## Batasan yang disengaja
 
@@ -118,5 +106,5 @@ Tidak perlu Dockerfile: Railway mengenali Laravel, memasang dependency, menjalan
 - Akun hanya dibuat lewat seeder; tidak ada registrasi atau halaman manajemen user.
 - Satu pengajuan reimbursement hanya memuat satu nota.
 - Kuota cuti tidak direset otomatis tiap tahun.
-- `lockForUpdate` tidak berefek di SQLite. Perlindungan terhadap approval bersamaan baru benar-benar berlaku di MySQL atau PostgreSQL.
+- `lockForUpdate` tidak berefek di SQLite (dipakai saat pengembangan dan test). Perlindungan terhadap approval bersamaan berlaku di versi online yang memakai PostgreSQL.
 - Rekap CSV memakai pemisah koma. Excel dengan format regional Indonesia mungkin perlu impor lewat menu Data.
